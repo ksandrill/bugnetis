@@ -6,30 +6,29 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class UdpCloneDetector {
-    private MulticastSocket _socket;
-    private final SocketAddress _multicastAddr;
-    private final int _timeout;
-    private final int _port;
-    private final int UPDATE_TIMEOUT = 3000;
+    private  MulticastSocket socket;
+    private final SocketAddress multicastAddr;
+    private final int TIMEOUT;
+    private final int UPDATE_TIMEOUT;
     private long lastSendtime;
     private long lastRecvtime;
 
-    public UdpCloneDetector(String multicastAddr, int port, int timeout) throws IOException {
-        _multicastAddr = new InetSocketAddress(multicastAddr,port);
-        _port = port;
-        _timeout = timeout;
-        _socket = new MulticastSocket(_port);
+    public UdpCloneDetector(String multicastAddr, int port, int timeout, int updateTimeout) throws IOException {
+        this.multicastAddr = new InetSocketAddress(multicastAddr,port);
+        TIMEOUT = timeout;
+        UPDATE_TIMEOUT = updateTimeout;
+        socket = new MulticastSocket(port);
         NetworkInterface IFC = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
-        _socket.setSoTimeout(_timeout);
-        _socket.joinGroup(_multicastAddr,IFC);
+        socket.setSoTimeout(TIMEOUT);
+        socket.joinGroup(this.multicastAddr,IFC);
 
 
     }
 
     public void send(String message) throws IOException {
         byte[] messByte = message.getBytes();
-        DatagramPacket sendPacket = new DatagramPacket(messByte,messByte.length,_multicastAddr);
-        _socket.send(sendPacket);
+        DatagramPacket sendPacket = new DatagramPacket(messByte,messByte.length, multicastAddr);
+        socket.send(sendPacket);
         lastSendtime = System.currentTimeMillis();
 
     }
@@ -38,7 +37,7 @@ public class UdpCloneDetector {
         byte[] messByte = new byte[128];
         DatagramPacket recvPacket = new DatagramPacket(messByte,messByte.length);
         try{
-            _socket.receive(recvPacket);
+            socket.receive(recvPacket);
             lastRecvtime = System.currentTimeMillis();
 
         } catch (IOException e) {
@@ -55,7 +54,7 @@ public class UdpCloneDetector {
         Map<String, Long> knownCopies = new HashMap<>();
         LinkedList<String> deffered = new LinkedList<>();
         while (true){
-            if(System.currentTimeMillis() - lastSendtime > _timeout){
+            if(System.currentTimeMillis() - lastSendtime > TIMEOUT){
                 send("hello");
 
             }
@@ -73,8 +72,9 @@ public class UdpCloneDetector {
 
             }
             deffered.clear();
+            System.out.println(knownCopies.size() + " alive!");
             for(Map.Entry<String, Long> entry : knownCopies.entrySet()) {
-               System.out.println(entry.getKey() + " last seen at " + new Date(entry.getValue()) + "s");
+               System.out.println(entry.getKey() + " last seen at " + new Date(entry.getValue()));
             }
 
 
