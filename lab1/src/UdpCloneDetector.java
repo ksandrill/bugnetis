@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class UdpCloneDetector {
@@ -8,9 +10,10 @@ public class UdpCloneDetector {
     private final SocketAddress _multicastAddr;
     private final int _timeout;
     private final int _port;
+    private final int UPDATE_TIMEOUT = 3000;
     private long lastSendtime;
     private long lastRecvtime;
-    private Map<String, Long> knownCopies;
+
     public UdpCloneDetector(String multicastAddr, int port, int timeout) throws IOException {
         _multicastAddr = new InetSocketAddress(multicastAddr,port);
         _port = port;
@@ -27,7 +30,6 @@ public class UdpCloneDetector {
         byte[] messByte = message.getBytes();
         DatagramPacket sendPacket = new DatagramPacket(messByte,messByte.length,_multicastAddr);
         _socket.send(sendPacket);
-        System.out.println("send message to"+sendPacket.getAddress());
         lastSendtime = System.currentTimeMillis();
 
     }
@@ -50,18 +52,33 @@ public class UdpCloneDetector {
     public void run() throws IOException {
 
         lastSendtime = System.currentTimeMillis();
-        knownCopies = new HashMap<>();
+        Map<String, Long> knownCopies = new HashMap<>();
+        LinkedList<String> deffered = new LinkedList<>();
         while (true){
             if(System.currentTimeMillis() - lastSendtime > _timeout){
                 send("hello");
 
             }
             var localIp = recieve();
-            lastRecvtime = System.currentTimeMillis();
-            knownCopies.put(localIp,lastRecvtime);
-            System.out.println(knownCopies);
+            if(localIp != null) {
+                knownCopies.put(localIp, lastRecvtime);
+            }
+            for(Map.Entry<String, Long> entry : knownCopies.entrySet()) {
+                if(System.currentTimeMillis() - entry.getValue() > UPDATE_TIMEOUT){
+                    deffered.add(entry.getKey());
+                }
+            }
+            for (var value: deffered) {
+                knownCopies.remove(value);
 
-            System.out.println("got message from " + localIp);
+            }
+            deffered.clear();
+            for(Map.Entry<String, Long> entry : knownCopies.entrySet()) {
+               System.out.println(entry.getKey() + " last seen at " + new Date(entry.getValue()) + "s");
+            }
+
+
+
 
 
         }
