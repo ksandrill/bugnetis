@@ -3,9 +3,9 @@ package a.shshelokov;
 import a.shshelokov.Message.Message;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 public class Packet {
+    private int tryNumber;
     private InetSocketAddress socketAddress;
     private Message message;
 

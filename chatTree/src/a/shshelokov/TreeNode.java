@@ -17,7 +17,7 @@ public class TreeNode {
     private ConcurrentLinkedQueue<Packet> recvPackets = new ConcurrentLinkedQueue<>();
     private ConcurrentLinkedQueue<Packet> packetsToSend = new ConcurrentLinkedQueue<>();
     private ConcurrentLinkedQueue<Packet> savedPacketsToSend = new ConcurrentLinkedQueue<>();
-    private ConcurrentHashMap<SocketAddress, LocalTime> relatives = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<InetSocketAddress, LocalTime> relatives = new ConcurrentHashMap<>();
 
 
     public TreeNode(String name, int port, int lossPercentage, InetSocketAddress parent) throws SocketException {
@@ -38,9 +38,23 @@ public class TreeNode {
 
     }
 
-    public void addChild(InetSocketAddress child){
+    public void addChild(InetSocketAddress child) {
         children.add(child);
-        relatives.put(child,LocalTime.now());
+        relatives.put(child, LocalTime.now());
+
+    }
+
+    public void updateRelatives(InetSocketAddress aliveNode) {
+        for (InetSocketAddress addr : relatives.keySet()) {
+            if (addr.equals(aliveNode)) {
+                relatives.replace(addr, LocalTime.now());
+
+            }
+        }
+
+    }
+
+    public void clearDeadNodes(){
 
     }
 
@@ -86,11 +100,13 @@ public class TreeNode {
         return savedPacketsToSend;
     }
 
-    public ConcurrentHashMap<SocketAddress, LocalTime> getRelatives() {
+    public ConcurrentHashMap<InetSocketAddress, LocalTime> getRelatives() {
         return relatives;
     }
 
     public boolean hasParent() {
         return parent != null;
     }
+
+
 }

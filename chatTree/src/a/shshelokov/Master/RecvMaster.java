@@ -44,7 +44,8 @@ public class RecvMaster implements Runnable {
                         System.out.println(packet.getInetSocketAddress().toString() + "//" + packet.getMessage().getName() + " got my message");
                         break;
                     case PING_MESSAGE:
-                        break;
+                        node.updateRelatives(packet.getInetSocketAddress());
+
                 }
 
 
@@ -65,14 +66,14 @@ public class RecvMaster implements Runnable {
         ConcurrentLinkedQueue<InetSocketAddress> children = node.getChildren();
         Packet packetToSpread;
         if (node.hasParent()) {
-            if (src != node.getParent()) {
+            if (!src.equals(node.getParent())) {
                 packetToSpread = new Packet(node.getParent(), packet.getMessage());
                 packetsToSend.add(packetToSpread);
             }
 
         }
         for(InetSocketAddress sendAddr : children){
-            if(sendAddr != src){
+            if(!src.equals(sendAddr)){
                 packetToSpread = new Packet(sendAddr,packet.getMessage());
                 packetsToSend.add(packetToSpread);
             }
