@@ -1,16 +1,23 @@
-package a.shshelokov;
+package a.shshelokov.Message;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class Message implements Serializable {
     private final MessageType messageType;
     private final String  messageText;
-    private final int GUID;
+    private final String name;
+    private final UUID GUID;
 
-    public Message(MessageType messageType, String messageText, int guid) {
+    public Message(MessageType messageType,String hostname, String messageText, UUID guid) {
         this.messageType = messageType;
         this.messageText = messageText;
+        this.name = hostname;
         this.GUID = guid;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public MessageType getMessageType() {
@@ -21,7 +28,7 @@ public class Message implements Serializable {
         return messageText;
     }
 
-    public int getGUID() {
+    public UUID getGUID() {
         return GUID;
     }
 }

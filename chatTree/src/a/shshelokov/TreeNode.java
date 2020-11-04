@@ -1,40 +1,55 @@
 package a.shshelokov;
 
+import a.shshelokov.Message.Message;
+
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class TreeNode {
     private final String name;
     private final int lossPercentage;
     private final DatagramSocket socket;
-    private boolean isRoot;
     private InetSocketAddress parent;
     private ConcurrentLinkedQueue<InetSocketAddress> children;
+    private ConcurrentLinkedQueue<Packet> recvPackets;
+    private ConcurrentLinkedQueue<Packet> packetsToSend;
 
 
-    public TreeNode(String _name, int _port, int _lossPercentage, InetSocketAddress _parent) throws SocketException {
-        this.name = _name;
-        this.socket = new DatagramSocket(_port);
-        this.lossPercentage = _lossPercentage;
-        this.parent = _parent;
-        this.isRoot = false;
+
+
+    public TreeNode(String name, int port, int lossPercentage, InetSocketAddress parent) throws SocketException {
+        this.name = name;
+        this.socket = new DatagramSocket(port);
+        this.lossPercentage = lossPercentage;
+        this.parent = parent;
         this.children = new ConcurrentLinkedQueue<>();
+        this.recvPackets = new ConcurrentLinkedQueue<>();
+        this.packetsToSend = new ConcurrentLinkedQueue<>();
+
     }
 
-    public TreeNode(String _name, int _port, int _lossPercentage) throws SocketException {
-        this.name = _name;
-        this.socket = new DatagramSocket(_port);
-        this.lossPercentage = _lossPercentage;
+    public TreeNode(String name, int port, int lossPercentage) throws SocketException {
+        this.name = name;
+        this.socket = new DatagramSocket(port);
+        this.lossPercentage = lossPercentage;
         this.parent = null;
-        this.isRoot = true;
         this.children = new ConcurrentLinkedQueue<>();
+        this.recvPackets = new ConcurrentLinkedQueue<>();
+        this.packetsToSend = new ConcurrentLinkedQueue<>();
 
     }
 
-    public void setRoot(boolean root) {
-        isRoot = root;
+    public ConcurrentLinkedQueue<Packet> getRecvPackets() {
+        return recvPackets;
+    }
+
+    public ConcurrentLinkedQueue<Packet> getPacketsToSend() {
+        return packetsToSend;
     }
 
     public void setParent(InetSocketAddress parent) {
@@ -57,9 +72,6 @@ public class TreeNode {
         return socket;
     }
 
-    public boolean isRoot() {
-        return isRoot;
-    }
 
     public InetSocketAddress getParent() {
         return parent;
@@ -67,5 +79,8 @@ public class TreeNode {
 
     public ConcurrentLinkedQueue<InetSocketAddress> getChildren() {
         return children;
+    }
+    public boolean hasParent(){
+        return parent != null;
     }
 }
