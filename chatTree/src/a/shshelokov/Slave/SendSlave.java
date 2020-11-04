@@ -1,6 +1,7 @@
 package a.shshelokov.Slave;
 
 import a.shshelokov.Message.Message;
+import a.shshelokov.Message.MessageType;
 import a.shshelokov.Packet;
 import a.shshelokov.TreeNode;
 
@@ -10,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SendSlave implements Runnable {
@@ -26,13 +28,20 @@ public class SendSlave implements Runnable {
 
     @Override
     public void run() {
+        ConcurrentLinkedQueue<Packet> packetsToSend = node.getPacketsToSend();
+        ConcurrentLinkedQueue<Packet>SavedPacketsToSend = node.getSavedPacketsToSend();
+        if(node.hasParent()){
+            Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE,node.getName(),"Adopt me, my lord", UUID.randomUUID());
+            Packet  adoptPacket = new Packet(node.getParent(),adoptMessage);
+            packetsToSend.add(adoptPacket);
+        }
         while (true) {
-            ConcurrentLinkedQueue<Packet> packetsToSend = node.getPacketsToSend();
             try {
                 Packet packet = packetsToSend.poll();
                 if(packet !=null) {
-                    System.out.println("send: " + packet.getMessage().getMessageText() +" to " +packet.getSocketAddress().toString());
-                    sendMessage(packet.getMessage(), packet.getSocketAddress());
+                    SavedPacketsToSend.add(packet);
+                    System.out.println("send: " + packet.getMessage().getMessageText() +" to " +packet.getInetSocketAddress().toString());
+                    sendMessage(packet.getMessage(), packet.getInetSocketAddress());
                 }
 
             } catch (IOException e) {

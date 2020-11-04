@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RecvSlave implements Runnable {
@@ -27,8 +28,7 @@ public class RecvSlave implements Runnable {
             ConcurrentLinkedQueue<Packet> recvPackets = node.getRecvPackets();
             try {
                 Packet packet = getPacket();
-                System.out.println("from " + packet.getSocketAddress().toString() + " : " + packet.getMessage().getGUID() + "///" + packet.getMessage().getMessageType() + "///" + packet.getMessage().getName() + ": " + packet.getMessage().getMessageText());
-                recvPackets.add(getPacket());
+                recvPackets.add(packet);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -42,7 +42,7 @@ public class RecvSlave implements Runnable {
         socket.receive(recvPacket);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(recvPacket.getData()));
         Message recvMessage = (Message) ois.readObject();
-        return new Packet(recvPacket.getSocketAddress(), recvMessage);
+        return new Packet((InetSocketAddress) recvPacket.getSocketAddress(), recvMessage);
 
     }
 

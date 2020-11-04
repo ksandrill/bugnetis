@@ -1,25 +1,23 @@
 package a.shshelokov;
 
-import a.shshelokov.Message.Message;
-
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
-
-import java.util.concurrent.BlockingQueue;
+import java.time.LocalTime;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class TreeNode {
     private final String name;
     private final int lossPercentage;
     private final DatagramSocket socket;
     private InetSocketAddress parent;
-    private ConcurrentLinkedQueue<InetSocketAddress> children;
-    private ConcurrentLinkedQueue<Packet> recvPackets;
-    private ConcurrentLinkedQueue<Packet> packetsToSend;
-
-
+    private ConcurrentLinkedQueue<InetSocketAddress> children = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Packet> recvPackets = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Packet> packetsToSend = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Packet> savedPacketsToSend = new ConcurrentLinkedQueue<>();
+    private ConcurrentHashMap<SocketAddress, LocalTime> relatives = new ConcurrentHashMap<>();
 
 
     public TreeNode(String name, int port, int lossPercentage, InetSocketAddress parent) throws SocketException {
@@ -27,9 +25,7 @@ public class TreeNode {
         this.socket = new DatagramSocket(port);
         this.lossPercentage = lossPercentage;
         this.parent = parent;
-        this.children = new ConcurrentLinkedQueue<>();
-        this.recvPackets = new ConcurrentLinkedQueue<>();
-        this.packetsToSend = new ConcurrentLinkedQueue<>();
+
 
     }
 
@@ -38,9 +34,13 @@ public class TreeNode {
         this.socket = new DatagramSocket(port);
         this.lossPercentage = lossPercentage;
         this.parent = null;
-        this.children = new ConcurrentLinkedQueue<>();
-        this.recvPackets = new ConcurrentLinkedQueue<>();
-        this.packetsToSend = new ConcurrentLinkedQueue<>();
+
+
+    }
+
+    public void addChild(InetSocketAddress child){
+        children.add(child);
+        relatives.put(child,LocalTime.now());
 
     }
 
@@ -80,7 +80,17 @@ public class TreeNode {
     public ConcurrentLinkedQueue<InetSocketAddress> getChildren() {
         return children;
     }
-    public boolean hasParent(){
+
+
+    public ConcurrentLinkedQueue<Packet> getSavedPacketsToSend() {
+        return savedPacketsToSend;
+    }
+
+    public ConcurrentHashMap<SocketAddress, LocalTime> getRelatives() {
+        return relatives;
+    }
+
+    public boolean hasParent() {
         return parent != null;
     }
 }
