@@ -13,9 +13,10 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RecvSlave implements Runnable {
-    DatagramSocket socket;
-    TreeNode node;
-    final int BUFF_SIZE = 2048;
+    private DatagramSocket socket;
+    private TreeNode node;
+    private final int REC_TTL = 1;
+
 
     public RecvSlave(TreeNode node) {
         this.socket = node.getSocket();
@@ -38,11 +39,12 @@ public class RecvSlave implements Runnable {
     }
 
     private Packet getPacket() throws IOException, ClassNotFoundException {
-        DatagramPacket recvPacket = new DatagramPacket(new byte[BUFF_SIZE], BUFF_SIZE);
+        DatagramPacket recvPacket = new DatagramPacket(new byte[Message.BUFF_SIZE], Message.BUFF_SIZE);
         socket.receive(recvPacket);
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(recvPacket.getData()));
         Message recvMessage = (Message) ois.readObject();
-        return new Packet((InetSocketAddress) recvPacket.getSocketAddress(), recvMessage);
+
+        return new Packet((InetSocketAddress) recvPacket.getSocketAddress(), recvMessage,REC_TTL);
 
     }
 

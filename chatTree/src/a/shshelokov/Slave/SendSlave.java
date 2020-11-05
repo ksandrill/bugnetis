@@ -18,8 +18,6 @@ public class SendSlave implements Runnable {
     DatagramSocket socket;
     TreeNode node;
 
-    final int BUFF_SIZE = 2048;
-
 
     public SendSlave(TreeNode node) {
         this.socket = node.getSocket();
@@ -32,7 +30,7 @@ public class SendSlave implements Runnable {
         ConcurrentLinkedQueue<Packet>SavedPacketsToSend = node.getSavedPacketsToSend();
         if(node.hasParent()){
             Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE,node.getName(),"Adopt me, my lord", UUID.randomUUID());
-            Packet  adoptPacket = new Packet(node.getParent(),adoptMessage);
+            Packet  adoptPacket = new Packet(node.getParent(),adoptMessage,Packet.ADOPT_CHILD_TTL);
             packetsToSend.add(adoptPacket);
         }
         while (true) {
@@ -40,9 +38,12 @@ public class SendSlave implements Runnable {
                 Packet packet = packetsToSend.poll();
                 if(packet !=null) {
                     if(packet.getMessage().getMessageType() != MessageType.PING_MESSAGE){
+                        packet.decTtl();
                         SavedPacketsToSend.add(packet);
                     }
-                    System.out.println("send: " + packet.getMessage().getMessageText() +" to " +packet.getInetSocketAddress().toString());
+                    if(packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
+                        System.out.println("send: " + packet.getMessage().getMessageText() + " to " + packet.getInetSocketAddress().toString());
+                    }
                     sendMessage(packet.getMessage(), packet.getInetSocketAddress());
                 }
 
@@ -55,7 +56,7 @@ public class SendSlave implements Runnable {
     }
 
     void sendMessage(Message message, SocketAddress addPort) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(BUFF_SIZE);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(Message.BUFF_SIZE);
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(message);
         DatagramPacket packet = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, addPort);

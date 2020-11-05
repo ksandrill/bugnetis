@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class InputMaster implements Runnable {
     Scanner inputReader;
     TreeNode node;
+    final int TTL = 4;
 
     public InputMaster(TreeNode node) {
         this.node = node;
@@ -25,12 +26,12 @@ public class InputMaster implements Runnable {
         ConcurrentLinkedQueue<Packet> packetsToSend = node.getPacketsToSend();
         while (true) {
             Message msg = new Message(MessageType.CHAT_MESSAGE, node.getName(), inputReader.nextLine(), UUID.randomUUID());
-            System.out.println("(from this node)" + msg.getGUID() + "///" + msg.getMessageType() + "///" + msg.getName() +": " +  msg.getMessageText());
+           //// System.out.println("(from this node)" + msg.getGUID() + "///" + msg.getMessageType() + "///" + msg.getName() +": " +  msg.getMessageText());
             for (InetSocketAddress sendAddr : children) {
-                packetsToSend.add(new Packet(sendAddr, msg));
+                packetsToSend.add(new Packet(sendAddr, msg,TTL));
             }
             if(node.hasParent()){
-                packetsToSend.add(new Packet(node.getParent(),msg));
+                packetsToSend.add(new Packet(node.getParent(),msg,TTL));
             }
         }
 

@@ -1,18 +1,15 @@
 package a.shshelokov;
 
 import a.shshelokov.Master.InputMaster;
+import a.shshelokov.Master.MessageBufferMaster;
 import a.shshelokov.Master.PingMaster;
 import a.shshelokov.Master.RecvMaster;
-import a.shshelokov.Message.Message;
-import a.shshelokov.Message.MessageType;
 import a.shshelokov.Slave.RecvSlave;
 import a.shshelokov.Slave.SendSlave;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
 
 public class ChatTree {
 
@@ -38,7 +35,8 @@ public class ChatTree {
         new Thread(new RecvMaster(node)).start();
         new Thread(new SendSlave(node)).start();
         new Thread(new RecvSlave(node)).start();
-        timer.scheduleAtFixedRate(new PingMaster(node),3000,3000);
+        timer.scheduleAtFixedRate(new PingMaster(node),7000,7000);
+        timer.scheduleAtFixedRate(new MessageBufferMaster(node),10000,15000);
 
         System.out.println(name + " is alive");
 

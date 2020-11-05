@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.UUID;
 
 public class Message implements Serializable {
+    public final static int BUFF_SIZE = 2048;
+
     private final MessageType messageType;
     private final String  messageText;
     private final String name;

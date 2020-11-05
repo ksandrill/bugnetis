@@ -23,19 +23,19 @@ public class PingMaster extends TimerTask {
     }
 
 
-    void pingNodes(){
+    void pingNodes() {
         var children = node.getChildren();
         var packetsToSend = node.getPacketsToSend();
         Packet pingPacket;
         Message message;
         for (InetSocketAddress child : children) {
             message = new Message(MessageType.PING_MESSAGE, node.getName(), "I'm stil alive", UUID.randomUUID());
-            pingPacket = new Packet(child, message);
+            pingPacket = new Packet(child, message, Packet.PING_TTL);
             packetsToSend.add(pingPacket);
         }
         if (node.hasParent()) {
             message = new Message(MessageType.PING_MESSAGE, node.getName(), "I'm stil alive", UUID.randomUUID());
-            pingPacket = new Packet(node.getParent(), message);
+            pingPacket = new Packet(node.getParent(), message, Packet.PING_TTL);
             packetsToSend.add(pingPacket);
 
         }
