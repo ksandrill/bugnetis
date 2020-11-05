@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,21 +28,23 @@ public class SendSlave implements Runnable {
     @Override
     public void run() {
         ConcurrentLinkedQueue<Packet> packetsToSend = node.getPacketsToSend();
-        ConcurrentLinkedQueue<Packet>SavedPacketsToSend = node.getSavedPacketsToSend();
-        if(node.hasParent()){
-            Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE,node.getName(),"Adopt me, my lord", UUID.randomUUID());
-            Packet  adoptPacket = new Packet(node.getParent(),adoptMessage,Packet.ADOPT_CHILD_TTL);
+        ConcurrentLinkedQueue<Packet> SavedPacketsToSend = node.getSavedPacketsToSend();
+        if (node.hasParent()) {
+            ///System.out.println("s"+ socket.getLocalAddress());
+            InetSocketAddress nodeAddr = new InetSocketAddress(socket.getInetAddress(),socket.getLocalPort());
+            Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE, node.getName(), nodeAddr.toString(), UUID.randomUUID());
+            Packet adoptPacket = new Packet(node.getParent(), adoptMessage, Packet.ADOPT_CHILD_TTL);
             packetsToSend.add(adoptPacket);
         }
         while (true) {
             try {
                 Packet packet = packetsToSend.poll();
-                if(packet !=null) {
-                    if(packet.getMessage().getMessageType() != MessageType.PING_MESSAGE){
+                if (packet != null) {
+                    if (packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
                         packet.decTtl();
                         SavedPacketsToSend.add(packet);
                     }
-                    if(packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
+                    if (packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
                         System.out.println("send: " + packet.getMessage().getMessageText() + " to " + packet.getInetSocketAddress().toString());
                     }
                     sendMessage(packet.getMessage(), packet.getInetSocketAddress());

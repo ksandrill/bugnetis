@@ -8,9 +8,11 @@ import a.shshelokov.TreeNode;
 import java.net.InetSocketAddress;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class PingMaster extends TimerTask {
     TreeNode node;
+    final long DEAD_TIME = 10_000_000_000L;
 
     public PingMaster(TreeNode node) {
         this.node = node;
@@ -18,7 +20,11 @@ public class PingMaster extends TimerTask {
 
     @Override
     public void run() {
+        System.out.println("PING ACTIVATED");
         pingNodes();
+        checkPing();
+        checkAlterNode();
+
 
     }
 
@@ -41,6 +47,44 @@ public class PingMaster extends TimerTask {
         }
 
     }
+
+    void checkPing() {
+        boolean parentIsDead = false;
+        for (InetSocketAddress item : node.getRelatives().keySet()) {
+            long delta =System.nanoTime() - node.getRelatives().get(item);
+            var aux  = TimeUnit.SECONDS.convert(delta,TimeUnit.NANOSECONDS);
+            System.out.println(item.toString() + " was seen " + aux + "s  ago");
+            if (delta > DEAD_TIME) {
+                parentIsDead = node.forgetRelative(item);
+                System.out.println(item.toString() + " is dead");
+
+            }
+        }
+        if (parentIsDead) {
+            System.out.println("parent is dead");
+            node.setParent(node.getFosterParent());
+            node.setFosterParent(null);
+            InetSocketAddress nodeAddr = new InetSocketAddress(node.getSocket().getInetAddress(), node.getSocket().getLocalPort());
+            Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE, node.getName(), nodeAddr.toString(), UUID.randomUUID());
+            Packet adoptPacket = new Packet(node.getParent(), adoptMessage, Packet.ADOPT_CHILD_TTL);
+            node.getPacketsToSend().add(adoptPacket);
+        }
+    }
+
+    void checkAlterNode() {
+        var children = node.getChildren();
+        var alterNode = node.getAlterNode();
+        var packetsToSend = node.getPacketsToSend();
+        if (!children.contains(alterNode)) {
+            node.setAlterNode(children.peek());
+            if (alterNode != null) {
+                Message message = new Message(MessageType.SEND_FOSTER_MESSAGE, node.getName(), alterNode.toString(), UUID.randomUUID());
+                Packet packet = new Packet(alterNode, message, Packet.SEND_FOSTER_TTL);
+                Packet.spreadPacket(packet, packetsToSend, Packet.SEND_FOSTER_TTL, node, true);
+            }
+        }
+    }
+
 
 }
 

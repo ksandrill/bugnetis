@@ -1,6 +1,5 @@
 package a.shshelokov.Master;
 
-import a.shshelokov.Message.Message;
 import a.shshelokov.Message.MessageType;
 import a.shshelokov.Packet;
 import a.shshelokov.TreeNode;
@@ -25,7 +24,7 @@ public class RecvMaster implements Runnable {
         while (true) {
             Packet packet = recvMessage.poll();
             if (packet != null) {
-                if(packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
+                if (packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
                     System.out.println("recv::" + packet.getMessage().getMessageText() + "////" + packet.getInetSocketAddress().toString());
                 }
                 switch (packet.getMessage().getMessageType()) {
@@ -36,17 +35,36 @@ public class RecvMaster implements Runnable {
                     }
                     case ADOPT_CHILD_MESSAGE -> {
                         node.addChild(packet.getInetSocketAddress());
-                        answerToPacket(packet, MessageType.ACCEPT_CHILD_MESSAGE, "I (" + node.getName() + ") accept you", packetsToSend, Packet.ACCEPT_CHILD_TTL);
+                        Packet.answerToPacket(packet, MessageType.ACCEPT_CHILD_MESSAGE, "I (" + node.getName() + ") accept you", packetsToSend, Packet.ACCEPT_CHILD_TTL,node.getName());
+                        if (!node.hasAlterNode()) {
+                            node.setAlterNode(packet.getInetSocketAddress());
+
+                            Packet.spreadPacket(packet, packetsToSend, Packet.SEND_FOSTER_TTL,node,true);
+                            System.out.println("i got alter node" + packet.getInetSocketAddress().toString());
+                        } else {
+                            Packet.answerToPacket(packet,MessageType.SEND_FOSTER_MESSAGE,node.getAlterNode().toString(),packetsToSend,Packet.SEND_FOSTER_TTL, node.getName());
+                        }
+
                     }
                     case CHAT_MESSAGE -> {
-                        answerToPacket(packet, MessageType.ACCEPT_CHAT_MESSAGE, "I (" + node.getName() + ") accept message from you", packetsToSend, Packet.ACCEPT_CHAT_MESSAGE_TTL);
-                        spreadPacket(packet, packetsToSend, Packet.CHAT_MESSAGE_TTL);
+                        Packet.answerToPacket(packet, MessageType.ACCEPT_CHAT_MESSAGE, "I (" + node.getName() + ") accept message from you", packetsToSend, Packet.ACCEPT_CHAT_MESSAGE_TTL, node.getName());
+                        Packet.spreadPacket(packet, packetsToSend, Packet.CHAT_MESSAGE_TTL,node, false);
                     }
                     case ACCEPT_CHAT_MESSAGE -> {
                         SavedPacketsToSend.removeIf(item -> item.getMessage().getGUID().equals(packet.getMessage().getGUID()));
                         System.out.println(packet.getInetSocketAddress().toString() + "//" + packet.getMessage().getName() + " got my message");
                     }
                     case PING_MESSAGE -> node.updateRelatives(packet.getInetSocketAddress());
+                    case SEND_FOSTER_MESSAGE -> {
+                        Packet.answerToPacket(packet,MessageType.CONFIRM_FOSTER_MESSAGE,"got foster",packetsToSend,Packet.CONFIRM_FOSTER_TTL,node.getName());
+                        String[] data = packet.getMessage().getMessageText().split(":");
+                        data[0] = data[0].substring(1);
+                        InetSocketAddress fosterAddr = new InetSocketAddress(data[0], Integer.parseInt(data[1]));
+                        node.setFosterParent(fosterAddr);
+                        System.out.println("i got a foster" + fosterAddr.toString());
+
+                    }
+                    case CONFIRM_FOSTER_MESSAGE -> SavedPacketsToSend.removeIf(item -> item.getMessage().getGUID().equals(packet.getMessage().getGUID()));
                 }
 
 
@@ -56,31 +74,7 @@ public class RecvMaster implements Runnable {
 
     }
 
-    private void answerToPacket(Packet packet, MessageType type, String text, ConcurrentLinkedQueue<Packet> packetsToSend, int ttl) {
-        Message message = new Message(type, node.getName(), text, packet.getMessage().getGUID());
-        Packet answerPacket = new Packet(packet.getInetSocketAddress(), message,ttl);
-        packetsToSend.add(answerPacket);
-    }
-
-    private void spreadPacket(Packet packet, ConcurrentLinkedQueue<Packet> packetsToSend, int ttl) {
-        InetSocketAddress src = packet.getInetSocketAddress();
-        ConcurrentLinkedQueue<InetSocketAddress> children = node.getChildren();
-        Packet packetToSpread;
-        if (node.hasParent()) {
-            if (!src.equals(node.getParent())) {
-                packetToSpread = new Packet(node.getParent(), packet.getMessage(),ttl);
-                packetsToSend.add(packetToSpread);
-            }
-
-        }
-        for(InetSocketAddress sendAddr : children){
-            if(!src.equals(sendAddr)){
-                packetToSpread = new Packet(sendAddr,packet.getMessage(),ttl);
-                packetsToSend.add(packetToSpread);
-            }
-
-        }
 
 
-    }
+
 }
