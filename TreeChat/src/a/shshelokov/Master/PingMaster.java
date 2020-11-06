@@ -48,40 +48,49 @@ public class PingMaster extends TimerTask {
     void checkPing() {
         boolean parentIsDead = false;
         for (InetSocketAddress item : node.getRelatives().keySet()) {
-            long delta =System.nanoTime() - node.getRelatives().get(item);
-            var aux  = TimeUnit.SECONDS.convert(delta,TimeUnit.NANOSECONDS);
-            ///System.out.println(item.toString() + " was seen " + aux + "s  ago");
+            long delta = System.nanoTime() - node.getRelatives().get(item);
             if (delta > DEAD_TIME) {
                 parentIsDead = node.forgetRelative(item);
                 System.out.println(item.toString() + " is dead");
 
+
             }
         }
         if (parentIsDead) {
-            //System.out.println("parent is dead");
-            node.setParent(node.getFosterParent());
-            node.setFosterParent(null);
-            if(node.hasParent()) {
-                InetSocketAddress nodeAddr = new InetSocketAddress(node.getSocket().getInetAddress(), node.getSocket().getLocalPort());
-                Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE, node.getName(), nodeAddr.toString(), UUID.randomUUID());
-                Packet adoptPacket = new Packet(node.getParent(), adoptMessage, Packet.ADOPT_CHILD_TTL);
-                node.getPacketsToSend().add(adoptPacket);
-            }
+            System.out.println("parent is dead");
+            swapParent();
+
         }
     }
 
+
     void checkAlterNode() {
-        var children = node.getChildren();
-        var alterNode = node.getAlterNode();
-        var packetsToSend = node.getPacketsToSend();
-        if (!children.contains(alterNode)) {
-            node.setAlterNode(children.peek());
-            if (alterNode != null) {
-                Message message = new Message(MessageType.SEND_FOSTER_MESSAGE, node.getName(), alterNode.toString(), UUID.randomUUID());
-                Packet packet = new Packet(alterNode, message, Packet.SEND_FOSTER_TTL);
-                Packet.spreadPacket(packet, packetsToSend, Packet.SEND_FOSTER_TTL, node, true);
-            }
+        if (!node.getChildren().contains(node.getAlterNode())) {
+            swapAlterNode();
+
         }
+    }
+
+    private void swapParent() {
+        node.setParent(node.getFosterParent());
+        node.setFosterParent(null);
+        if (node.hasParent()) {
+            InetSocketAddress nodeAddr = new InetSocketAddress(node.getSocket().getInetAddress(), node.getSocket().getLocalPort());
+            Message adoptMessage = new Message(MessageType.ADOPT_CHILD_MESSAGE, node.getName(), nodeAddr.toString(), UUID.randomUUID());
+            Packet adoptPacket = new Packet(node.getParent(), adoptMessage, Packet.ADOPT_CHILD_TTL);
+            node.getPacketsToSend().add(adoptPacket);
+        }
+
+    }
+
+    private void swapAlterNode() {
+        node.setAlterNode(node.getChildren().peek());
+        if (node.getAlterNode() != null) {
+            Message message = new Message(MessageType.SEND_FOSTER_MESSAGE, node.getName(), node.getAlterNode().toString(), UUID.randomUUID());
+            Packet packet = new Packet(node.getAlterNode(), message, Packet.SEND_FOSTER_TTL);
+            Packet.spreadPacket(packet, node.getPacketsToSend(), Packet.SEND_FOSTER_TTL, node, true);
+        }
+
     }
 
 

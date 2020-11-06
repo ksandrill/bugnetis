@@ -24,12 +24,16 @@ public class InputMaster implements Runnable {
         ConcurrentLinkedQueue<InetSocketAddress> children = node.getChildren();
         ConcurrentLinkedQueue<Packet> packetsToSend = node.getPacketsToSend();
         while (true) {
-            Message msg = new Message(MessageType.CHAT_MESSAGE, node.getName(), inputReader.nextLine(), UUID.randomUUID());
+            String  input = inputReader.nextLine();
+            Message msg;
            //// System.out.println("(from this node)" + msg.getGUID() + "///" + msg.getMessageType() + "///" + msg.getName() +": " +  msg.getMessageText());
             for (InetSocketAddress sendAddr : children) {
+                msg = new Message(MessageType.CHAT_MESSAGE, node.getName(), input, UUID.randomUUID());
+
                 packetsToSend.add(new Packet(sendAddr, msg,Packet.CHAT_MESSAGE_TTL));
             }
             if(node.hasParent()){
+                msg = new Message(MessageType.CHAT_MESSAGE, node.getName(), input, UUID.randomUUID());
                 packetsToSend.add(new Packet(node.getParent(),msg,Packet.CHAT_MESSAGE_TTL));
             }
         }

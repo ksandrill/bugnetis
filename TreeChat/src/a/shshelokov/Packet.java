@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Packet {
@@ -74,16 +75,19 @@ public class Packet {
         InetSocketAddress src = packet.getInetSocketAddress();
         ConcurrentLinkedQueue<InetSocketAddress> children = node.getChildren();
         Packet packetToSpread;
+        Message messageToSpread;
         if (node.hasParent() && !onlyChildren) {
             if (!src.equals(node.getParent())) {
-                packetToSpread = new Packet(node.getParent(), packet.getMessage(), ttl);
+                messageToSpread = new Message(packet.getMessage().getMessageType(),packet.getMessage().getName(),packet.getMessage().getMessageText(), UUID.randomUUID());
+                packetToSpread = new Packet(node.getParent(),messageToSpread, ttl);
                 packetsToSend.add(packetToSpread);
             }
 
         }
         for (InetSocketAddress sendAddr : children) {
             if (!src.equals(sendAddr)) {
-                packetToSpread = new Packet(sendAddr, packet.getMessage(), ttl);
+                messageToSpread =  new Message(packet.getMessage().getMessageType(),packet.getMessage().getName(),packet.getMessage().getMessageText(), UUID.randomUUID());
+                packetToSpread = new Packet(sendAddr, messageToSpread, ttl);
                 packetsToSend.add(packetToSpread);
             }
 
