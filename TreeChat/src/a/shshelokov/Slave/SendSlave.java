@@ -45,6 +45,7 @@ public class SendSlave implements Runnable {
                     }
                     if (packet.getMessage().getMessageType() != MessageType.PING_MESSAGE) {
                        System.out.println("type: " + packet.getMessage().getMessageType());
+                       System.out.println("ttl: " + packet.getTtl());
                        System.out.println("send: " + packet.getMessage().getMessageText() + " to " + packet.getInetSocketAddress().toString());
                    }
                     sendMessage(packet.getMessage(), packet.getInetSocketAddress());
