@@ -11,6 +11,10 @@ public class Cell {
         this.y = y;
     }
 
+    public boolean equalsCoords(int x, int y) {
+        return this.x == x && this.y == y;
+    }
+
     public int getX() {
         return x;
     }

@@ -16,9 +16,29 @@ public class Snake {
 
     }
 
+    public boolean isMyPartCoords(int x, int y) {
+        for (Cell cell : cells) {
+            if (cell.equalsCoords(x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void move(int countHeightCells, int countWidthCells) {
         moveTail();
         moveHead(countHeightCells, countWidthCells);
+    }
+
+    public boolean isEatSelf() {
+        var head = cells.get(0);
+        int cellsSize = cells.size();
+        for (int i = 1; i < cellsSize; ++i) {
+            if (head.equals(cells.get(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void moveTail() {

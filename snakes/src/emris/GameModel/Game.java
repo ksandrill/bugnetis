@@ -14,9 +14,10 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.TimerTask;
 
-public class GameThread extends TimerTask {
+public class Game extends TimerTask {
     GraphicsContext renderer;
     ArrayList<Snake> snakes = new ArrayList<>();
     ArrayList<Food> food = new ArrayList<>();
@@ -24,8 +25,12 @@ public class GameThread extends TimerTask {
     final int HEIGHT_COUNT_CELLS;
     final int WIDTH_COUNT_CELLS;
     final int CELL_SIZE;
+    final double FOOD_PER_PLAYER = 1;
+    final int FOOD_STATIC = 10;
+    final int ALIVE = 1; /// заглушка
 
-    public GameThread(GraphicsContext renderer, Scene scene, int widthCountCells, int HeightCountCells, int cellSize) {
+
+    public Game(GraphicsContext renderer, Scene scene, int widthCountCells, int HeightCountCells, int cellSize) {
         this.renderer = renderer;
         HEIGHT_COUNT_CELLS = HeightCountCells;
         WIDTH_COUNT_CELLS = widthCountCells;
@@ -36,8 +41,7 @@ public class GameThread extends TimerTask {
         playerSnake.setDirection(Direction.UP);
         playerSnake.addCell(x, y);
         playerSnake.addCell(x, y + 1);////переписать с генереацией места выбора
-        addFood(0, 0, Color.BLUE);
-
+        createFood();
         scene.addEventFilter(KeyEvent.KEY_PRESSED, key -> {
             if (key.getCode() == KeyCode.W) {
                 playerSnake.setDirection(Direction.UP);
@@ -63,8 +67,6 @@ public class GameThread extends TimerTask {
     @Override
     public void run() {
         step();
-
-
         Platform.runLater(() -> {
             renderer.clearRect(0, 0, renderer.getCanvas().getWidth(), renderer.getCanvas().getHeight());
             renderer.strokeRect(0, 0, renderer.getCanvas().getHeight(), renderer.getCanvas().getWidth());
@@ -72,19 +74,13 @@ public class GameThread extends TimerTask {
             for (Cell snakeCell : playerSnake.getCells()) {
                 renderer.fillRect(snakeCell.getX() * CELL_SIZE, snakeCell.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 renderer.strokeRect(snakeCell.getX() * CELL_SIZE, snakeCell.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-
-
             }
             for (Food foodIter : food) {
                 renderer.setFill(foodIter.getColor());
-
                 renderer.fillOval(foodIter.getCell().getX() * CELL_SIZE, foodIter.getCell().getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                 renderer.strokeOval(foodIter.getCell().getX() * CELL_SIZE, foodIter.getCell().getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
             }
-
         });
-
-
     }
 
     private void step() {
@@ -92,37 +88,66 @@ public class GameThread extends TimerTask {
     }
 
     private void changeState() {
+        createFood();
         playerSnake.move(HEIGHT_COUNT_CELLS, WIDTH_COUNT_CELLS);
         checkCollision();
 
 
     }
-    
 
-    private void addFood(int x, int y, Color color) {
-        this.food.add(new Food(x, y, color));
+
+    private void createFood() {
+        int foodCount = (int) (FOOD_STATIC + FOOD_PER_PLAYER * ALIVE);
+        int curFood = food.size();
+        foodCount -= curFood;
+        int curCount = 0;
+        boolean isEmptyCell;
+        Random rand = new Random();
+        while (curCount != foodCount) {
+            int x = rand.nextInt(WIDTH_COUNT_CELLS - 1);
+            int y = rand.nextInt(HEIGHT_COUNT_CELLS - 1);
+            isEmptyCell = true;
+            System.out.println(x + " " + y);
+            for (Food foodIter : food) {
+                var foodCell = foodIter.getCell();
+                if (foodCell.equalsCoords(x, y)) {
+                    isEmptyCell = false;
+                }
+
+            }
+            if (playerSnake.isMyPartCoords(x, y)) {
+                isEmptyCell = false;
+                System.out.println("food is lost");
+
+            }
+            if (isEmptyCell) {
+                System.out.println("add food");
+                this.food.add(new Food(x, y, Color.color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble())));
+                ++curCount;
+            }
+        }
+        System.out.println("all food is created");
     }
 
     private void checkCollision() {
-        var deffFood= new LinkedList<Food>();
-        for (Food foodIter : food) {
-            if (foodIter.getCell().equals(playerSnake.getCells().get(0))){
-                deffFood.add(foodIter);
-                playerSnake.addCell(-1,-1);
-
-            }
+        checkEatFood(playerSnake);
+        if (playerSnake.isEatSelf()) {
+            playerSnake = null;
         }
-        for(Food remFood: deffFood)
-        food.removeIf(foodItem ->(foodItem == remFood));
-
     }
 
-    private void AddSnake(int x, int y, Color color) {
-        var snake = new Snake(color);
-        snake.addCell(x, y);
-        snake.addCell(x, y + 1);////переписать с генереацией места выбора
-        snakes.add(snake);
 
+    private void checkEatFood(Snake snake) {
+        var deffFood = new LinkedList<Food>();
+        for (Food foodIter : food) {
+            if (foodIter.getCell().equals(snake.getCells().get(0))) {
+                deffFood.add(foodIter);
+                snake.addCell(-1, -1);
+            }
+        }
+        for (Food remFood : deffFood)
+            food.removeIf(foodItem -> (foodItem == remFood));
+        deffFood.clear();
     }
 
 

@@ -1,4 +1,4 @@
-package emris;
+package emris.GameModel;
 
 public class Controller {
 }

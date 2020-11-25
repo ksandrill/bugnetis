@@ -11,7 +11,7 @@ import java.util.Timer;
 
 public class App extends Application {
     Timer timer = new Timer(true);
-    final long TIMEOUT = 500;
+    final long TIMEOUT = 250;
 
 
     @Override
@@ -23,10 +23,10 @@ public class App extends Application {
         Group root = new Group();
         Scene theScene = new Scene(root);
         primaryStage.setScene(theScene);
-        Canvas canvas = new Canvas(512, 512);
+        Canvas canvas = new Canvas(600, 600);
         root.getChildren().add(canvas);
         GraphicsContext renderer = canvas.getGraphicsContext2D();
-        timer.scheduleAtFixedRate(new GameThread(renderer, theScene, 20, 20, 32), 0, TIMEOUT);
+        timer.scheduleAtFixedRate(new Game(renderer, theScene, 20, 20, 30), 0, TIMEOUT);
         primaryStage.show();
 
 
