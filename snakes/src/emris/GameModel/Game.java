@@ -1,12 +1,11 @@
 package emris.GameModel;
 
 
+import emris.GameModel.Entity.Cell;
 import emris.GameModel.Entity.Direction;
 import emris.GameModel.Entity.Food;
 import emris.GameModel.Entity.Snake;
-import emris.GameModel.GUI.Table.Table;
-import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -15,33 +14,35 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
 public class Game extends TimerTask {
     ArrayList<Snake> snakes = new ArrayList<>();
     ArrayList<Food> food = new ArrayList<>();
     final int HEIGHT_COUNT_CELLS;
     final int WIDTH_COUNT_CELLS;
-    final int CELL_SIZE;
     final double FOOD_PER_PLAYER = 1;
     final int FOOD_STATIC = 5;
+    final float DEAD_FOOD_PROB = 0.9F;
     final GameDrawer drawer;
+    final Object gameLock;
 
 
-    public Game(GraphicsContext renderer, Scene scene, int widthCountCells, int HeightCountCells, int cellSize, Table table) {
+    public Game(final Consumer<EventHandler<KeyEvent>> keyBindConsumer, int widthCountCells, int HeightCountCells, GameDrawer gameDrawer, Object gameLock) {
         HEIGHT_COUNT_CELLS = HeightCountCells;
         WIDTH_COUNT_CELLS = widthCountCells;
-        CELL_SIZE = cellSize;
+        this.gameLock = gameLock;
         var playerSnake = createSnake("Cratos", Color.CRIMSON, WIDTH_COUNT_CELLS / 2, HeightCountCells / 2);
         var playerSnake1 = createSnake("boy", Color.GREEN, 2, 2);
-
         snakes.add(playerSnake);
         snakes.add(playerSnake1);
-        addKeyHandler(KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, playerSnake1, scene);
-        addKeyHandler(KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D, playerSnake, scene);
+        addKeyHandler(keyBindConsumer, KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, playerSnake1);
+        addKeyHandler(keyBindConsumer, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D, playerSnake);
         createFood();
-        drawer = new GameDrawer(renderer, table, CELL_SIZE);
+        drawer = gameDrawer;
         drawer.addToTable(playerSnake);
         drawer.addToTable(playerSnake1);
+
     }
 
     @Override
@@ -60,8 +61,8 @@ public class Game extends TimerTask {
         return snake;
     }
 
-    private void addKeyHandler(KeyCode up, KeyCode down, KeyCode left, KeyCode right, Snake snake, Scene scene) {
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, key -> {
+    private void addKeyHandler(final Consumer<EventHandler<KeyEvent>> keyBindConsumer, KeyCode up, KeyCode down, KeyCode left, KeyCode right, Snake snake) {
+        keyBindConsumer.accept(key -> {
             if (key.getCode() == up) {
                 snake.setDirection(Direction.UP);
                 System.out.println("UP");
@@ -83,18 +84,22 @@ public class Game extends TimerTask {
 
             }
 
-
         });
 
     }
 
 
     private void masterStep() {
-        createFood();
-        for (Snake snake : snakes) {
-            snake.move(HEIGHT_COUNT_CELLS, WIDTH_COUNT_CELLS);
+        synchronized (gameLock) {
+            for (Snake snake : snakes) {
+                snake.move(HEIGHT_COUNT_CELLS, WIDTH_COUNT_CELLS);
+                System.out.println(snake.getCells().get(0).getX());
+                System.out.println(snake.getCells().get(0).getY());
+            }
+            checkCollision();
+            createFood();
+
         }
-        checkCollision();
 
 
     }
@@ -103,11 +108,13 @@ public class Game extends TimerTask {
     private void createFood() {
         int foodCount = (int) (FOOD_STATIC + FOOD_PER_PLAYER * snakes.size());
         int curFood = food.size();
+        System.out.println("curFood: " + curFood);
+        System.out.println("FoodCount: " + foodCount);
         foodCount -= curFood;
         int curCount = 0;
         boolean isEmptyCell;
         Random rand = new Random();
-        while (curCount != foodCount) {
+        while (curCount < foodCount) {
             int x = rand.nextInt(WIDTH_COUNT_CELLS - 1);
             int y = rand.nextInt(HEIGHT_COUNT_CELLS - 1);
             isEmptyCell = true;
@@ -128,6 +135,21 @@ public class Game extends TimerTask {
                 this.food.add(new Food(x, y, Color.color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble())));
                 ++curCount;
             }
+        }
+    }
+
+    private void tryCreateDeadFood(Snake snake) {
+        var snakeCells = snake.getCells();
+        Random rand = new Random();
+
+        for (Cell cell : snakeCells) {
+            float diceProc = rand.nextFloat();
+            if (diceProc <= DEAD_FOOD_PROB) {
+                this.food.add(new Food(cell.getX(), cell.getY(), Color.color(rand.nextDouble(), rand.nextDouble(), rand.nextDouble())));
+
+            }
+
+
         }
     }
 
