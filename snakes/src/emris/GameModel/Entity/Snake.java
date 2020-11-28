@@ -8,13 +8,25 @@ public class Snake {
     private int score;
     private Color color;
     private int playerId;
+    private String playerName;
     private Direction direction;
     LinkedList<Cell> cells = new LinkedList<>();
 
-    public Snake(Color color) {
+    public Snake(String playerName, Color color) {
+        this.playerName = playerName;
         this.color = color;
+        this.score = 0;
 
     }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
 
     public boolean isMyPartCoords(int x, int y) {
         for (Cell cell : cells) {

@@ -2,8 +2,6 @@ package emris.GameModel.Entity;
 
 import javafx.scene.paint.Color;
 
-import java.util.LinkedList;
-
 public class Food {
     private Color color;
     private Cell cell;
