@@ -32,7 +32,7 @@ public class Game extends TimerTask {
         HEIGHT_COUNT_CELLS = HeightCountCells;
         WIDTH_COUNT_CELLS = widthCountCells;
         this.gameLock = gameLock;
-        var playerSnake = createSnake("Cratos", Color.CRIMSON, WIDTH_COUNT_CELLS / 2, HeightCountCells / 2);
+        var playerSnake = createSnake("dad", Color.CRIMSON, WIDTH_COUNT_CELLS / 2, HeightCountCells / 2);
         var playerSnake1 = createSnake("boy", Color.GREEN, 2, 2);
         snakes.add(playerSnake);
         snakes.add(playerSnake1);
@@ -168,7 +168,10 @@ public class Game extends TimerTask {
             }
         }
         for (var deff : deffSnakes) {
-            snakes.removeIf(item -> (item == deff));
+            if (snakes.contains(deff)) {
+                snakes.remove(deff);
+                tryCreateDeadFood(deff);
+            }
         }
         deffSnakes.clear();
     }
