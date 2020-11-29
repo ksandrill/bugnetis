@@ -1,0 +1,109 @@
+emris/GameModel/Game.java
+ emris.GameModel.Game
+emris/GameModel/Main.java
+ emris.GameModel.Main
+Network/RecvUtils/RecvMaster.java
+ Network.RecvUtils.RecvMaster
+Network/SendUtils/PingSendMaster.java
+ Network.SendUtils.PingSendMaster
+emris/GameModel/GameDrawer.java
+ emris.GameModel.GameDrawer
+Network/protocol/MessageHandler.java
+ Network.protocol.MessageHandler
+emris/GameModel/Entity/Food.java
+ emris.GameModel.Entity.Food
+Network/SendUtils/Sender.java
+ Network.SendUtils.Sender
+emris/GameModel/App.java
+ emris.GameModel.App
+emris/GameModel/Entity/Direction.java
+ emris.GameModel.Entity.Direction
+emris/GameModel/Entity/Snake.java
+ emris.GameModel.Entity.Snake
+ emris.GameModel.Entity.Snake$1
+Network/RecvUtils/RecvSlave.java
+ Network.RecvUtils.RecvSlave
+emris/GameModel/MasterConfig.java
+ emris.GameModel.MasterConfig
+Network/SendUtils/AnnouncementSendMaster.java
+ Network.SendUtils.AnnouncementSendMaster
+emris/GameModel/Entity/Cell.java
+ emris.GameModel.Entity.Cell
+emris/GameModel/Table/Table.java
+ emris.GameModel.Table.Table
+emris/GameModel/Table/TableNode.java
+ emris.GameModel.Table.TableNode
+Network/protocol/SnakesProto.java
+ Network.protocol.SnakesProto
+ Network.protocol.SnakesProto$1
+ Network.protocol.SnakesProto$Direction
+ Network.protocol.SnakesProto$Direction$1
+ Network.protocol.SnakesProto$GameConfig
+ Network.protocol.SnakesProto$GameConfig$1
+ Network.protocol.SnakesProto$GameConfig$Builder
+ Network.protocol.SnakesProto$GameConfigOrBuilder
+ Network.protocol.SnakesProto$GameMessage
+ Network.protocol.SnakesProto$GameMessage$1
+ Network.protocol.SnakesProto$GameMessage$AckMsg
+ Network.protocol.SnakesProto$GameMessage$AckMsg$1
+ Network.protocol.SnakesProto$GameMessage$AckMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$AckMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$AnnouncementMsg
+ Network.protocol.SnakesProto$GameMessage$AnnouncementMsg$1
+ Network.protocol.SnakesProto$GameMessage$AnnouncementMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$AnnouncementMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$Builder
+ Network.protocol.SnakesProto$GameMessage$ErrorMsg
+ Network.protocol.SnakesProto$GameMessage$ErrorMsg$1
+ Network.protocol.SnakesProto$GameMessage$ErrorMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$ErrorMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$JoinMsg
+ Network.protocol.SnakesProto$GameMessage$JoinMsg$1
+ Network.protocol.SnakesProto$GameMessage$JoinMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$JoinMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$PingMsg
+ Network.protocol.SnakesProto$GameMessage$PingMsg$1
+ Network.protocol.SnakesProto$GameMessage$PingMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$PingMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$RoleChangeMsg
+ Network.protocol.SnakesProto$GameMessage$RoleChangeMsg$1
+ Network.protocol.SnakesProto$GameMessage$RoleChangeMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$RoleChangeMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$StateMsg
+ Network.protocol.SnakesProto$GameMessage$StateMsg$1
+ Network.protocol.SnakesProto$GameMessage$StateMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$StateMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$SteerMsg
+ Network.protocol.SnakesProto$GameMessage$SteerMsg$1
+ Network.protocol.SnakesProto$GameMessage$SteerMsg$Builder
+ Network.protocol.SnakesProto$GameMessage$SteerMsgOrBuilder
+ Network.protocol.SnakesProto$GameMessage$TypeCase
+ Network.protocol.SnakesProto$GameMessageOrBuilder
+ Network.protocol.SnakesProto$GamePlayer
+ Network.protocol.SnakesProto$GamePlayer$1
+ Network.protocol.SnakesProto$GamePlayer$Builder
+ Network.protocol.SnakesProto$GamePlayerOrBuilder
+ Network.protocol.SnakesProto$GamePlayers
+ Network.protocol.SnakesProto$GamePlayers$1
+ Network.protocol.SnakesProto$GamePlayers$Builder
+ Network.protocol.SnakesProto$GamePlayersOrBuilder
+ Network.protocol.SnakesProto$GameState
+ Network.protocol.SnakesProto$GameState$1
+ Network.protocol.SnakesProto$GameState$Builder
+ Network.protocol.SnakesProto$GameState$Coord
+ Network.protocol.SnakesProto$GameState$Coord$1
+ Network.protocol.SnakesProto$GameState$Coord$Builder
+ Network.protocol.SnakesProto$GameState$CoordOrBuilder
+ Network.protocol.SnakesProto$GameState$Snake
+ Network.protocol.SnakesProto$GameState$Snake$1
+ Network.protocol.SnakesProto$GameState$Snake$Builder
+ Network.protocol.SnakesProto$GameState$Snake$SnakeState
+ Network.protocol.SnakesProto$GameState$Snake$SnakeState$1
+ Network.protocol.SnakesProto$GameState$SnakeOrBuilder
+ Network.protocol.SnakesProto$GameStateOrBuilder
+ Network.protocol.SnakesProto$NodeRole
+ Network.protocol.SnakesProto$NodeRole$1
+ Network.protocol.SnakesProto$PlayerType
+ Network.protocol.SnakesProto$PlayerType$1
+Network/NetNode.java
+ Network.NetNode
