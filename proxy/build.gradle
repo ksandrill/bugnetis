@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id "org.openjfx.javafxplugin" version "0.0.9"
+
+
+}
+
+group 'emris'
+version '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
+}
+
+javafx {
+    version = "15.0.1"
+    modules = [ 'javafx.controls' ]
+}
+
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
+    compile group: 'dnsjava', name:'dnsjava', version: '3.1.0'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compileJava.options.encoding = 'UTF-8'
+}
+
+tasks {
+    jar {
+        manifest {
+            attributes 'Main-Class': 'java/App.java'
+        }
+        from {
+            configurations.compileClasspath.collect {
+                it.isDirectory() ? it : zipTree(it)
+            }
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

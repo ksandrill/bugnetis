@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Main-Class: emris.snakes.Main
+Class-Path: javafx-fxml-15.0.1-win.jar lombok-1.18.16.jar javafx-control
+ s-15.0.1-win.jar junit-platform-commons-1.4.2.jar protobuf-java-3.13.0.
+ jar javafx-base-15.0.1.jar javafx-graphics-15.0.1.jar javafx-base-15.0.
+ 1-win.jar junit-jupiter-params-5.4.2.jar opentest4j-1.1.1.jar gson-2.8.
+ 6.jar javafx-graphics-15.0.1-win.jar junit-platform-engine-1.4.2.jar ja
+ vafx-controls-15.0.1.jar junit-jupiter-5.4.2.jar apiguardian-api-1.0.0.
+ jar junit-jupiter-engine-5.4.2.jar annotations-20.1.0.jar junit-jupiter
+ -api-5.4.2.jar
+
